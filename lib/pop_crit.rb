@@ -1,6 +1,7 @@
 # Created by Christopher Hazlett on 2009-03-25.
 # Copyright 2009 Integrate Consulting LLC. All rights reserved.
 # www.integratechange.com
+# chazlett at integratechange.com
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
