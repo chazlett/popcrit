@@ -1,0 +1,92 @@
+PopCrit
+=======
+The PopCrit plugin provides an easy method to create a conditions array for use in Rails queries.  You may ask, why would I need a way to assemble the default rails conditions array when I can do it myself.  Well, PopCrit does two things that you won't have to anymore: assemble a large conditions array from parameters submitted by a form and removes any criteria with a specific value.
+
+In essence, the PopCrit methods (described below) dynamically create conditions for your rails find actions.  This makes it especially adept at processing conditions based on a series of user-selected fields.
+
+It adds two methods to your controllers, process_criteria_params and process_criteria_array.
+
+process_criteria_params - Takes submitted form parameters and converts them into a conditions array.  Allows the user to provide field name substitutions, sql operator substitutions and value overrides
+
+process_criteria_array - This is a simpler version of the process_criteria_params method.  The 'array' method converts an array of 3-element arrays into the conditions array.
+
+
+Example
+========================================
+USING THE PROCESS_CRITERIA_PARAMS METHOD
+----------------------------------------
+This would typically be used in conjunction with a user controlled form, such as the one below:
+
+<% form_for :infocard, :url => { :action => "index" }, :name=>"dynamic" do |f| -%>
+<table>
+  <tr>
+    <td>
+      <%= text_field_tag "dynamic[fn]" %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <%= select_tag "dynamic[resource_type]",  options_for_select(["Company", "Contact"]), :multiple => true %>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <%= select_tag "dynamic[currency_single]",  options_for_select([["Dollar", "$"], ["Kroner", "DKK"], ["Yuan", "YEN"], ["Skip", "all"]], "all")%>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <%= submit_tag 'Submit' %>
+    </td>
+  </tr>
+</table>
+
+-------------------------------------------
+Default Behavior
+-------------------------------------------
+For default behavior, you would use the process_criteria_params in your controller like so:
+@cards = Infocard.find(:all,:conditions=>process_criteria_params(params[:dynamic]), :limit=>10)
+
+This will result in a conditions array like the following:
+["fn = ? AND resource_type IN (?) AND currency_single = ?", "Chris", ["Company", "Contact"], "$"]
+
+-------------------------------------------
+Rename a field submitted by the form
+-------------------------------------------
+If you wish to rename the 'fn' field submitted by the form, you would submit the :override_fields hash as an option like so: 
+@cards = Infocard.find(:all,:conditions=>process_criteria_params(params[:dynamic], {:override_fields=>{:fn=>{:field_name=>"infocards.name_to_display"}}), :limit=>10)
+
+This will result in a conditions array like the following:
+["infocards.name_to_display = ? AND resource_type IN (?) AND currency_single = ?", "Chris", ["Company", "Contact"], "$"]
+
+-------------------------------------------
+Add characters to the submitted value
+-------------------------------------------
+If you want to change the sql operator or add string values to the end of a value, you can do the following
+@cards = Infocard.find(:all,:conditions=>process_criteria_params(params[:dynamic], {:override_fields=>{:fn=>{:field_name=>"infocards.name_to_display", :operator=>"like", :value_ends_with=>"%"}}), :limit=>10)
+
+This will result in a conditions array like the following:
+["infocards.name_to_display like ? AND resource_type IN (?) AND currency_single = ?", "Chris%", ["Company", "Contact"], "$"]
+
+
+You can also change the value you'd like to exclude from the final conditions array by specifying a :skip_value option.  The default for the skip_value option is "-1". This is useful for select form elements with an "all" value.
+
+If there is a certain sql statement you'd like to include in each condition statement, set the :sql_to_keep option to your desired raw sql.  This will be inserted as is, so verify any values you add to your sql statement.
+
+
+========================================
+USING THE PROCESS_CRITERIA_ARRAY METHOD
+----------------------------------------
+A simple array of field names, operators and values will also create a conditions array and remove any conditions with a specific value.
+
+To use it in a controller, use the following:
+@cards = Infocard.find(:all,:conditions=>process_criteria_array([["first_name", "like", "Chris%"], ["resource_type", "IN", ["Company","Contact"]], ["currency_single", "=", "$"]]), :limit=>10)
+
+The conditions will look like the 
+["first_name = ? AND resource_type IN (?) AND currency_single = ?", "Chris%", ["Company", "Contact"], "$"]
+
+The :sql_to_keep and :skip_value options are available and perform the same actions for process_criteria_array as well.
+
+===========================================
+Copyright (c) 2009 Integrate Consulting LLC by Christopher Hazlett, released under the MIT license
+www.integratechange.com
