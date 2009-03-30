@@ -26,7 +26,7 @@ module PopCrit
   # ===========================================================================================================================   
   # process_submitted_criteria takes the following parameters:
   # ---------------------------------------------------
-  # * <tt>params</tt> - the parameter array from the form submitting the dynamically created criteria
+  # * <tt>criteria</tt> - the parameter array from the form submitting the dynamically created criteria
   # 
   # Takes the following options hash values
   # * <tt>:skip_value</tt> - Any criteria matching this string value will be ommitted from the final conditions array. Defaults to '-1'
