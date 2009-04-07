@@ -12,6 +12,11 @@ process_criteria_array - This is a simpler version of the process_criteria_param
 
 
 Example
+To get started, add the include statement to your application_controller
+class ApplicationController < ActiveRecord::Base
+  include PopCrit
+end
+
 ========================================
 USING THE PROCESS_CRITERIA_PARAMS METHOD
 ----------------------------------------
